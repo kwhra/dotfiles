@@ -1,0 +1,64 @@
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  alias ls='ls -a --color=auto'
+  #alias dir='dir --color=auto'
+  #alias vdir='vdir --color=auto'
+
+  alias grep='grep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  alias egrep='egrep --color=auto'
+  alias diff='diff --color=auto'
+fi
+
+# rm ailas to move files to a "trash" directory instead of deleting them
+rm() {
+  local TRASH_DIR=~/.trash
+  local targets=()
+
+  # ハイフンで始まる引数を除外して targets に格納
+  for arg in "$@"; do
+    case "$arg" in
+      -*)
+        ;;
+      *)
+        targets+=("$arg")
+        ;;
+    esac
+  done
+
+  if [ ${#targets[@]} -eq 0 ]; then
+    return
+  fi
+
+  # 移動処理
+  for item in "${targets[@]}"; do
+    local dest_path="$TRASH_DIR/$item"
+
+    # 同名のものがあれば削除
+    if [ -e "$dest_path" ]; then
+      /bin/rm -rf "$dest_path"
+    fi
+
+    mkdir -p "$(dirname "$dest_path")"
+
+    mv "$item" "$dest_path"
+  done
+
+  # ゴミ箱が肥大化したら警告を表示
+  # `du` は重たいらしいので20回に1回程度の確率でチェックを実行
+  if [ $((RANDOM % 20)) -eq 0 ]; then
+    local TRASH_SIZE_THRESHOLD_KB=1048576  # 1GB
+    local current_size_kb=$(du -sk "$TRASH_DIR" | cut -f1)
+
+    if [ "$current_size_kb" -gt "$TRASH_SIZE_THRESHOLD_KB" ]; then
+      echo # 見やすくするために空行を一つ入れる
+      echo "⚠️ ~/.trash 's size reaches $(($current_size_kb / 1024)) MB"
+      echo "   run: /bin/rm -rf $TRASH_DIR/*"
+    fi
+  fi
+
+}
+
+# beep if the previous command terminates
+alias alert='echo -e "\a"'
