@@ -21,4 +21,4 @@ if [ -f "$dotfiles_path/.zshrc_aliases" ]; then
 fi
 
 # pyenv
-eval "$(pyenv init -)"
+# eval "$(pyenv init -)"
