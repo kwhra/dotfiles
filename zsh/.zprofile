@@ -5,8 +5,10 @@
 #umask 022
 
 # path
-if [ -f ~/.zprofile_path ]; then
-  . ~/.zprofile_path
+dotfiles_path="$HOME/dotfiles/zsh"
+
+if [ -f "$dotfiles_path/.zprofile_path" ]; then
+	. "$dotfiles_path/.zprofile_path"
 fi
 
 # .zshrc

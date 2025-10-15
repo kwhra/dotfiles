@@ -67,8 +67,10 @@ source $ZSH/oh-my-zsh.sh
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
-if [ -f ~/.zshrc_aliases ]; then
-	. ~/.zshrc_aliases
+dotfiles_path="$HOME/dotfiles/zsh"
+
+if [ -f "$dotfiles_path/.zshrc_aliases" ]; then
+	. "$dotfiles_path/.zshrc_aliases"
 fi
 
 # pyenv
