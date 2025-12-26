@@ -1,64 +1,92 @@
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-  alias ls='ls -a --color=auto'
-  #alias dir='dir --color=auto'
-  #alias vdir='vdir --color=auto'
+# ============================================================================
+# Zsh Aliases and Custom Functions
+# ============================================================================
 
-  alias grep='grep --color=auto'
-  alias fgrep='fgrep --color=auto'
-  alias egrep='egrep --color=auto'
-  alias diff='diff --color=auto'
+# ----------------------------------------------------------------------------
+# Color Support for Common Commands
+# ----------------------------------------------------------------------------
+
+# Enable color support for ls, grep, and other commands
+if [ -x /usr/bin/dircolors ]; then
+    # Use custom dircolors if available, otherwise use default
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    
+    # ls with colors and show hidden files
+    alias ls='ls -a --color=auto'
+    
+    # grep family with color highlighting
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+    
+    # diff with color highlighting
+    alias diff='diff --color=auto'
 fi
 
-# rm ailas to move files to a "trash" directory instead of deleting them
+# ----------------------------------------------------------------------------
+# Safe Delete: Trash Function
+# ----------------------------------------------------------------------------
+# Override rm command to move files to trash instead of permanent deletion
+# This provides a safety net against accidental deletions
+
 rm() {
-  local TRASH_DIR=~/.trash
-  local targets=()
-
-  # ハイフンで始まる引数を除外して targets に格納
-  for arg in "$@"; do
-    case "$arg" in
-      -*)
-        ;;
-      *)
-        targets+=("$arg")
-        ;;
-    esac
-  done
-
-  if [ ${#targets[@]} -eq 0 ]; then
-    return
-  fi
-
-  # 移動処理
-  for item in "${targets[@]}"; do
-    local dest_path="$TRASH_DIR/$item"
-
-    # 同名のものがあれば削除
-    if [ -e "$dest_path" ]; then
-      /bin/rm -rf "$dest_path"
+    local TRASH_DIR=~/.trash
+    local targets=()
+    
+    # Filter out flag arguments (those starting with -)
+    # Only actual file/directory targets are moved to trash
+    for arg in "$@"; do
+        case "$arg" in
+            -*)
+                # Skip flag arguments
+                ;;
+            *)
+                # Add file/directory targets
+                targets+=("$arg")
+                ;;
+        esac
+    done
+    
+    # If no targets specified, return early
+    if [ ${#targets[@]} -eq 0 ]; then
+        return
     fi
-
-    mkdir -p "$(dirname "$dest_path")"
-
-    mv "$item" "$dest_path"
-  done
-
-  # ゴミ箱が肥大化したら警告を表示
-  # `du` は重たいらしいので20回に1回程度の確率でチェックを実行
-  if [ $((RANDOM % 20)) -eq 0 ]; then
-    local TRASH_SIZE_THRESHOLD_KB=1048576  # 1GB
-    local current_size_kb=$(du -sk "$TRASH_DIR" | cut -f1)
-
-    if [ "$current_size_kb" -gt "$TRASH_SIZE_THRESHOLD_KB" ]; then
-      echo # 見やすくするために空行を一つ入れる
-      echo "⚠️ ~/.trash 's size reaches $(($current_size_kb / 1024)) MB"
-      echo "   run: /bin/rm -rf $TRASH_DIR/*"
+    
+    # Move each target to trash
+    for item in "${targets[@]}"; do
+        local dest_path="$TRASH_DIR/$item"
+        
+        # If item with same name exists in trash, permanently delete it
+        if [ -e "$dest_path" ]; then
+            /bin/rm -rf "$dest_path"
+        fi
+        
+        # Create parent directory structure in trash
+        mkdir -p "$(dirname "$dest_path")"
+        
+        # Move item to trash
+        mv "$item" "$dest_path"
+    done
+    
+    # Periodically check trash size to prevent it from growing too large
+    # Check randomly (1 in 20 chance) to avoid performance impact
+    if [ $((RANDOM % 20)) -eq 0 ]; then
+        local TRASH_SIZE_THRESHOLD_KB=1048576  # 1 GB
+        local current_size_kb=$(du -sk "$TRASH_DIR" 2>/dev/null | cut -f1)
+        
+        # Warn if trash exceeds threshold
+        if [ -n "$current_size_kb" ] && [ "$current_size_kb" -gt "$TRASH_SIZE_THRESHOLD_KB" ]; then
+            echo
+            echo "⚠️  Trash directory (~/.trash) size: $(($current_size_kb / 1024)) MB"
+            echo "   Consider cleaning it up with: /bin/rm -rf $TRASH_DIR/*"
+            echo
+        fi
     fi
-  fi
-
 }
 
-# beep if the previous command terminates
+# ----------------------------------------------------------------------------
+# Utility Aliases
+# ----------------------------------------------------------------------------
+
+# Audio alert for command completion (useful for long-running commands)
 alias alert='echo -e "\a"'
