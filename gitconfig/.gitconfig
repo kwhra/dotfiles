@@ -1,5 +1,89 @@
+# ============================================================================
+# Git Configuration
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# User Identity
+# ----------------------------------------------------------------------------
 [user]
-	email = pkzmnz7zo@toki.waseda.jp
-	name = kwhra
+        email = pkzmnz7zo@toki.waseda.jp
+        name = kwhra
+
+# ----------------------------------------------------------------------------
+# Core Settings
+# ----------------------------------------------------------------------------
 [core]
-	editor = vim
+        # Default text editor for commit messages and other Git operations
+        editor = vim
+        
+        # Ensure consistent line endings across platforms
+        autocrlf = input
+        
+        # Enable parallel index preload for operations like git diff
+        preloadindex = true
+
+# ----------------------------------------------------------------------------
+# Color Settings
+# ----------------------------------------------------------------------------
+[color]
+        # Enable colored output for better readability
+        ui = auto
+
+# ----------------------------------------------------------------------------
+# Alias Shortcuts
+# ----------------------------------------------------------------------------
+[alias]
+        # Short status
+        st = status
+        
+        # Short commit
+        ci = commit
+        
+        # Short checkout
+        co = checkout
+        
+        # Short branch
+        br = branch
+        
+        # Show compact log with graph
+        lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+        
+        # Show all branches with graph
+        lga = log --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+        
+        # Undo last commit (keep changes)
+        undo = reset --soft HEAD^
+        
+        # Show what has changed since last commit
+        diff-staged = diff --staged
+
+# ----------------------------------------------------------------------------
+# Push Settings
+# ----------------------------------------------------------------------------
+[push]
+        # Push only the current branch by default
+        default = simple
+        
+        # Automatically set up remote tracking
+        autoSetupRemote = true
+
+# ----------------------------------------------------------------------------
+# Pull Settings
+# ----------------------------------------------------------------------------
+[pull]
+        # Use rebase instead of merge when pulling
+        rebase = false
+
+# ----------------------------------------------------------------------------
+# Diff Settings
+# ----------------------------------------------------------------------------
+[diff]
+        # Use better diff algorithm
+        algorithm = histogram
+
+# ----------------------------------------------------------------------------
+# Init Settings
+# ----------------------------------------------------------------------------
+[init]
+        # Use 'main' as the default branch name for new repositories
+        defaultBranch = main
